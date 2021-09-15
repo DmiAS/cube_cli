@@ -8,33 +8,45 @@ import (
 	"github.com/DmiAS/cube_cli/internal/app/models"
 )
 
-const protoType = "tcp"
+const (
+	protoType       = "tcp"
+	svcMsg    int32 = 0x00000001
+)
 
 type Client struct {
-	conn net.Conn
+	addr *net.TCPAddr
 }
 
 func NewClient(host, port string) (*Client, error) {
-	addr := fmt.Sprintf("%s:%s", host, port)
-	conn, err := net.Dial(protoType, addr)
+	strAddr := fmt.Sprintf("%s:%s", host, port)
+	addr, err := net.ResolveTCPAddr(protoType, strAddr)
 	if err != nil {
 		return nil, err
 	}
-	return &Client{conn: conn}, nil
+	return &Client{addr: addr}, nil
 }
 
 func (c *Client) Send(token, scope string) (*models.Response, error) {
+	conn, err := net.DialTCP(protoType, nil, c.addr)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
 	packet, err := packRequest(token, scope)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = c.conn.Write(packet)
-	if err != nil {
+	if _, err := conn.Write(packet); err != nil {
 		return nil, err
 	}
 
-	resp, err := ioutil.ReadAll(c.conn)
+	if err := conn.CloseWrite(); err != nil {
+		return nil, err
+	}
+
+	resp, err := ioutil.ReadAll(conn)
 	if err != nil {
 		return nil, err
 	}
@@ -45,10 +57,6 @@ func (c *Client) Send(token, scope string) (*models.Response, error) {
 	}
 
 	return &resPacket.Resp, nil
-}
-
-func (c *Client) Close() {
-	c.conn.Close()
 }
 
 func packRequest(token, scope string) ([]byte, error) {
@@ -68,7 +76,6 @@ func packRequest(token, scope string) ([]byte, error) {
 func packBody(token, scope string) ([]byte, error) {
 	svcToken := strToProtoString(token)
 	svcScope := strToProtoString(scope)
-	var svcMsg int32 = 0
 
 	return Marshal(models.Request{
 		SvcMsg: svcMsg,
