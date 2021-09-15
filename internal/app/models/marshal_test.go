@@ -40,6 +40,10 @@ func compareHeaders(a, b Header) bool {
 	return a.BodyLength == b.BodyLength && a.RequestID == b.RequestID && a.SvcID == b.SvcID
 }
 
+func compareReqPackets(a, b RequestPacket) bool {
+	return compareHeaders(a.Header, b.Header) && compareReq(a.Body, b.Body)
+}
+
 func TestStringCoding(t *testing.T) {
 	s := stringToString("token")
 
@@ -161,5 +165,37 @@ func TestHeaderCoding(t *testing.T) {
 
 	if !compareHeaders(h, newH) {
 		t.Fatalf("%v != %v", newH, h)
+	}
+}
+
+func TestRequestPacketCoding(t *testing.T) {
+	token := stringToString("token")
+	scope := stringToString("scope")
+	r := RequestPacket{
+		Header: Header{
+			SvcID:      10,
+			BodyLength: 20,
+			RequestID:  30,
+		},
+		Body: Request{
+			SvcMsg: 1,
+			Token:  token,
+			Scope:  scope,
+		},
+	}
+
+	data, err := r.Marshal()
+	if err != nil {
+		t.Fatal("error in marshal", err)
+	}
+
+	var newR RequestPacket
+
+	if err := newR.UnMarshal(data); err != nil {
+		t.Fatal("error in unmarshal", err)
+	}
+
+	if !compareReqPackets(r, newR) {
+		t.Fatalf("%v != %v", newR, r)
 	}
 }

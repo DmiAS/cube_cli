@@ -38,6 +38,7 @@ func (s *String) UnMarshal(data []byte) error {
 		return err
 	}
 
+	s.Str = make([]int8, 0, s.Len)
 	for i := int32(0); i < s.Len; i++ {
 		char, err := buf.ReadByte()
 		if err != nil {

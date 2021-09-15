@@ -61,3 +61,29 @@ func (r *Request) UnMarshal(data []byte) error {
 
 	return nil
 }
+
+func (r *RequestPacket) Marshal() ([]byte, error) {
+	header, err := r.Header.Marshal()
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := r.Body.Marshal()
+	if err != nil {
+		return nil, err
+	}
+
+	return append(header, body...), nil
+}
+
+func (r *RequestPacket) UnMarshal(data []byte) error {
+	buf := bytes.NewBuffer(data)
+	if err := binary.Read(buf, binary.LittleEndian, &r.Header); err != nil {
+		return err
+	}
+
+	if err := r.Body.UnMarshal(buf.Bytes()); err != nil {
+		return err
+	}
+	return nil
+}
