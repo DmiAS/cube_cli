@@ -36,6 +36,10 @@ func compareReq(a, b Request) bool {
 	return a.SvcMsg == b.SvcMsg && compareStrings(a.Token, b.Token) && compareStrings(a.Scope, b.Scope)
 }
 
+func compareHeaders(a, b Header) bool {
+	return a.BodyLength == b.BodyLength && a.RequestID == b.RequestID && a.SvcID == b.SvcID
+}
+
 func TestStringCoding(t *testing.T) {
 	s := stringToString("token")
 
@@ -134,5 +138,28 @@ func TestRequestZero(t *testing.T) {
 
 	if !compareReq(newR, r) {
 		t.Fatalf("%v != %v", newR, r)
+	}
+}
+
+func TestHeaderCoding(t *testing.T) {
+	h := Header{
+		SvcID:      10,
+		BodyLength: 20,
+		RequestID:  30,
+	}
+
+	data, err := h.Marshal()
+	if err != nil {
+		t.Fatal("error in marshal", err)
+	}
+
+	var newH Header
+
+	if err := newH.UnMarshal(data); err != nil {
+		t.Fatal("error in unmarshal", err)
+	}
+
+	if !compareHeaders(h, newH) {
+		t.Fatalf("%v != %v", newH, h)
 	}
 }
