@@ -17,12 +17,15 @@ func main() {
 	host, port := args[0], args[1]
 	token, scope := args[2], args[3]
 
-	cli, _ := iproto.NewClient(host, port)
+	cli, err := iproto.NewClient(host, port)
+	if err != nil {
+		log.Fatal("can't connect to cube service due to", err)
+	}
 	cube := client.NewCubeClient(cli)
 
 	resp, err := cube.Send(token, scope)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("internal error = ", err)
 	}
 	cube.PrintResponse(resp)
 }
