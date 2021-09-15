@@ -16,7 +16,7 @@ type RequestPacket struct {
 	Body   Request
 }
 
-func (r Request) Marshal() ([]byte, error) {
+func (r *Request) Marshal() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	if err := binary.Write(buf, binary.LittleEndian, r.SvcMsg); err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (r Request) Marshal() ([]byte, error) {
 		return nil, err
 	}
 
-	scope, err := r.Token.Marshal()
+	scope, err := r.Scope.Marshal()
 	if err != nil {
 		return nil, err
 	}
@@ -41,4 +41,23 @@ func (r Request) Marshal() ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func (r *Request) UnMarshal(data []byte) error {
+	buf := bytes.NewBuffer(data)
+	if err := binary.Read(buf, binary.LittleEndian, &r.SvcMsg); err != nil {
+		return err
+	}
+
+	if err := r.Token.UnMarshal(buf.Bytes()); err != nil {
+		return err
+	}
+
+	_ = buf.Next(r.Token.Length())
+
+	if err := r.Scope.UnMarshal(buf.Bytes()); err != nil {
+		return err
+	}
+
+	return nil
 }

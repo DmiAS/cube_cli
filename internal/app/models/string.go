@@ -5,9 +5,15 @@ import (
 	"encoding/binary"
 )
 
+const int32Size = 4
+
 type String struct {
 	Len int32
 	Str []int8
+}
+
+func (s String) Length() int {
+	return int32Size + len(s.Str)
 }
 
 func (s *String) Marshal() ([]byte, error) {

@@ -2,15 +2,19 @@ package models
 
 import "testing"
 
-func stringToSvcString(str string) []int8 {
-	b := make([]int8, len(str))
+func stringToString(str string) String {
+	length := len(str)
+	b := make([]int8, length)
 	for i := range str {
 		b[i] = int8(str[i])
 	}
-	return b
+	return String{
+		Len: int32(length),
+		Str: b,
+	}
 }
 
-func slisesIsEqual(a, b []int8) bool {
+func compareSlices(a, b []int8) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -24,71 +28,111 @@ func slisesIsEqual(a, b []int8) bool {
 	return true
 }
 
+func compareStrings(a, b String) bool {
+	return a.Len == b.Len && compareSlices(a.Str, b.Str)
+}
+
+func compareReq(a, b Request) bool {
+	return a.SvcMsg == b.SvcMsg && compareStrings(a.Token, b.Token) && compareStrings(a.Scope, b.Scope)
+}
+
 func TestStringCoding(t *testing.T) {
-	str := stringToSvcString("token")
-	s := &String{
-		Len: int32(len(str)),
-		Str: str,
-	}
+	s := stringToString("token")
 
 	data, err := s.Marshal()
 	if err != nil {
 		t.Fatal("error in marshal", err)
 	}
 
-	newS := new(String)
+	var newS String
 
 	if err := newS.UnMarshal(data); err != nil {
 		t.Fatal("error in unmarshal", err)
 	}
 
-	if newS.Len != newS.Len || !slisesIsEqual(s.Str, newS.Str) {
+	if !compareStrings(s, newS) {
 		t.Fatalf("%v != %v", newS, s)
 	}
 }
 
 func TestStringZero(t *testing.T) {
-	str := stringToSvcString("")
-	s := &String{
-		Len: int32(len(str)),
-		Str: str,
-	}
+	s := stringToString("")
 
 	data, err := s.Marshal()
 	if err != nil {
 		t.Fatal("error in marshal", err)
 	}
 
-	newS := new(String)
+	var newS String
 
 	if err := newS.UnMarshal(data); err != nil {
 		t.Fatal("error in unmarshal", err)
 	}
 
-	if newS.Len != newS.Len || !slisesIsEqual(s.Str, newS.Str) {
+	if !compareStrings(s, newS) {
 		t.Fatalf("%v != %v", newS, s)
 	}
 }
 
 func TestStringOne(t *testing.T) {
-	str := stringToSvcString("t")
-	s := &String{
-		Len: int32(len(str)),
-		Str: str,
-	}
+	s := stringToString("t")
 
 	data, err := s.Marshal()
 	if err != nil {
 		t.Fatal("error in marshal", err)
 	}
 
-	newS := new(String)
+	var newS String
 
 	if err := newS.UnMarshal(data); err != nil {
 		t.Fatal("error in unmarshal", err)
 	}
 
-	if newS.Len != newS.Len || !slisesIsEqual(s.Str, newS.Str) {
+	if !compareStrings(s, newS) {
 		t.Fatalf("%v != %v", newS, s)
+	}
+}
+
+func TestRequestCoding(t *testing.T) {
+	token := stringToString("token")
+	scope := stringToString("scope")
+	r := Request{
+		SvcMsg: 10,
+		Token:  token,
+		Scope:  scope,
+	}
+
+	data, err := r.Marshal()
+	if err != nil {
+		t.Fatal("error in marshal", err)
+	}
+
+	var newR Request
+	if err := newR.UnMarshal(data); err != nil {
+		t.Fatal("error in unmarshal", err)
+	}
+
+	if !compareReq(newR, r) {
+		t.Fatalf("%v != %v", newR, r)
+	}
+}
+
+func TestRequestZero(t *testing.T) {
+	r := Request{
+		SvcMsg: 10,
+	}
+
+	data, err := r.Marshal()
+	if err != nil {
+		t.Fatal("error in marshal", err)
+	}
+
+	var newR Request
+	if err := newR.UnMarshal(data); err != nil {
+		t.Fatal("error in unmarshal", err)
+	}
+
+	if !compareReq(newR, r) {
+		t.Fatalf("%v != %v", newR, r)
 	}
 }
