@@ -14,8 +14,8 @@ func Marshal(val interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func UnMarshal(dst []byte, val interface{}) error {
-	buf := bytes.NewBuffer(dst)
+func UnMarshal(src []byte, val interface{}) error {
+	buf := bytes.NewBuffer(src)
 	enc := gob.NewDecoder(buf)
 	if err := enc.Decode(val); err != nil {
 		return err

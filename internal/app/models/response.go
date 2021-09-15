@@ -1,21 +1,16 @@
 package models
 
-type OkResponseBody struct {
-	returnCode int32
-	clientID   String
-	clientType int32
-	userName   String
-	expiresIn  int32
-	userID     int64
-}
-
-type ErrResponseBody struct {
+type Response struct {
 	returnCode  int32
 	errorString String
+	clientID    String
+	clientType  int32
+	userName    String
+	expiresIn   int32
+	userID      int64
 }
 
-type Response struct {
-	header  Header
-	okResp  OkResponseBody
-	errResp ErrResponseBody
+type ResponsePacket struct {
+	Header Header
+	Resp   Response
 }

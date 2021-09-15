@@ -1,12 +1,12 @@
 package models
 
-type RequestBody struct {
+type Request struct {
 	SvcMsg int32
 	Token  String
 	Scope  String
 }
 
-type Request struct {
+type RequestPacket struct {
 	header Header
-	body   RequestBody
+	body   Request
 }
