@@ -1,24 +1,18 @@
 package iproto
 
-import (
-	"bytes"
-	"encoding/gob"
-)
-
-func Marshal(val interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(val); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+type Marshaller interface {
+	Marshal() ([]byte, error)
+	UnMarshal([]byte) error
 }
 
-func UnMarshal(src []byte, val interface{}) error {
-	buf := bytes.NewBuffer(src)
-	enc := gob.NewDecoder(buf)
-	if err := enc.Decode(val); err != nil {
-		return err
+func Marshal(val Marshaller) ([]byte, error) {
+	data, err := val.Marshal()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return data, nil
+}
+
+func UnMarshal(src []byte, val Marshaller) error {
+	return val.UnMarshal(src)
 }

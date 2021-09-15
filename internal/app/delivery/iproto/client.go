@@ -51,12 +51,12 @@ func (c *Client) Send(token, scope string) (*models.Response, error) {
 		return nil, err
 	}
 
-	var resPacket models.ResponsePacket
+	resPacket := new(models.ResponsePacket)
 	if err := UnMarshal(resp, resPacket); err != nil {
 		return nil, err
 	}
 
-	return &resPacket.Resp, nil
+	return &resPacket.Body, nil
 }
 
 func packRequest(token, scope string) ([]byte, error) {
@@ -77,7 +77,7 @@ func packBody(token, scope string) ([]byte, error) {
 	svcToken := strToProtoString(token)
 	svcScope := strToProtoString(scope)
 
-	return Marshal(models.Request{
+	return Marshal(&models.Request{
 		SvcMsg: svcMsg,
 		Token:  svcToken,
 		Scope:  svcScope,
