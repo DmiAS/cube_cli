@@ -1,16 +1,13 @@
 package iproto
 
 import (
-	"encoding/base64"
-
 	"github.com/DmiAS/cube_cli/internal/app/models"
 )
 
 func strToProtoString(str string) models.String {
-	encoded := base64.StdEncoding.EncodeToString([]byte(str))
-	length := int32(len(encoded))
+	length := int32(len(str))
 	b := make([]int8, length)
-	for i, char := range encoded {
+	for i, char := range str {
 		b[i] = int8(char)
 	}
 	return models.String{Len: length, Str: b}

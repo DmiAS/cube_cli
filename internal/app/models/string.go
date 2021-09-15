@@ -3,6 +3,7 @@ package models
 import (
 	"bytes"
 	"encoding/binary"
+	"strings"
 )
 
 const int32Size = 4
@@ -14,6 +15,17 @@ type String struct {
 
 func (s String) Length() int {
 	return int32Size + len(s.Str)
+}
+
+func (s String) ToString() (string, error) {
+	builder := new(strings.Builder)
+	for _, char := range s.Str {
+		if err := builder.WriteByte(byte(char)); err != nil {
+			return "", err
+		}
+	}
+
+	return builder.String(), nil
 }
 
 func (s *String) Marshal() ([]byte, error) {

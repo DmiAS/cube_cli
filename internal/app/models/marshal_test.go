@@ -44,10 +44,10 @@ func compareReqPackets(a, b RequestPacket) bool {
 	return compareHeaders(a.Header, b.Header) && compareReq(a.Body, b.Body)
 }
 
-func compareResponses(a, b Response) bool {
-	return a.userID == b.userID && a.expiresIn == b.expiresIn && a.clientType == b.clientType &&
-		compareStrings(a.userName, b.userName) && compareStrings(a.clientID, b.clientID) &&
-		compareStrings(a.errorString, b.errorString)
+func compareResponses(a, b ResponseBody) bool {
+	return a.UserID == b.UserID && a.ExpiresIn == b.ExpiresIn && a.ClientType == b.ClientType &&
+		compareStrings(a.UserName, b.UserName) && compareStrings(a.ClientID, b.ClientID) &&
+		compareStrings(a.ErrorString, b.ErrorString)
 }
 
 func compareResponsePackets(a, b ResponsePacket) bool {
@@ -214,14 +214,14 @@ func TestResponseCoding(t *testing.T) {
 	e := stringToString("e")
 	c := stringToString("c")
 	u := stringToString("u")
-	r := Response{
-		returnCode:  10,
-		errorString: e,
-		clientID:    c,
-		clientType:  20,
-		userName:    u,
-		expiresIn:   30,
-		userID:      40,
+	r := ResponseBody{
+		ReturnCode:  10,
+		ErrorString: e,
+		ClientID:    c,
+		ClientType:  20,
+		UserName:    u,
+		ExpiresIn:   30,
+		UserID:      40,
 	}
 
 	data, err := r.Marshal()
@@ -229,7 +229,7 @@ func TestResponseCoding(t *testing.T) {
 		t.Fatal("error in marshal", err)
 	}
 
-	var newR Response
+	var newR ResponseBody
 
 	if err := newR.UnMarshal(data); err != nil {
 		t.Fatal("error in unmarshal", err)
@@ -241,11 +241,11 @@ func TestResponseCoding(t *testing.T) {
 }
 
 func TestResponseZero(t *testing.T) {
-	r := Response{
-		returnCode: 10,
-		clientType: 20,
-		expiresIn:  30,
-		userID:     40,
+	r := ResponseBody{
+		ReturnCode: 10,
+		ClientType: 20,
+		ExpiresIn:  30,
+		UserID:     40,
 	}
 
 	data, err := r.Marshal()
@@ -253,7 +253,7 @@ func TestResponseZero(t *testing.T) {
 		t.Fatal("error in marshal", err)
 	}
 
-	var newR Response
+	var newR ResponseBody
 
 	if err := newR.UnMarshal(data); err != nil {
 		t.Fatal("error in unmarshal", err)
@@ -265,11 +265,11 @@ func TestResponseZero(t *testing.T) {
 }
 
 func TestResponsePacketCoding(t *testing.T) {
-	body := Response{
-		returnCode: 10,
-		clientType: 20,
-		expiresIn:  30,
-		userID:     40,
+	body := ResponseBody{
+		ReturnCode: 10,
+		ClientType: 20,
+		ExpiresIn:  30,
+		UserID:     40,
 	}
 
 	h := Header{

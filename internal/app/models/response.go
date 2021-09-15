@@ -5,96 +5,111 @@ import (
 	"encoding/binary"
 )
 
-type Response struct {
-	returnCode  int32
-	errorString String
-	clientID    String
-	clientType  int32
-	userName    String
-	expiresIn   int32
-	userID      int64
+type ResponseOk struct {
+	ReturnCode  int32
+	ErrorString string
+	ClientID    string
+	ClientType  int32
+	UserName    string
+	ExpiresIn   int32
+	UserID      int64
+}
+
+type ResponseErr struct {
+	ReturnCode  int32
+	ErrorString string
+}
+
+type ResponseBody struct {
+	ReturnCode  int32
+	ErrorString String
+	ClientID    String
+	ClientType  int32
+	UserName    String
+	ExpiresIn   int32
+	UserID      int64
 }
 
 type ResponsePacket struct {
 	Header Header
-	Body   Response
+	Body   ResponseBody
 }
 
-func (r *Response) Marshal() ([]byte, error) {
+func (r *ResponseBody) Marshal() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	if err := binary.Write(buf, binary.LittleEndian, r.returnCode); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, r.ReturnCode); err != nil {
 		return nil, err
 	}
 
-	errorString, err := r.errorString.Marshal()
+	ErrorString, err := r.ErrorString.Marshal()
 	if err != nil {
 		return nil, err
 	}
-	if _, err := buf.Write(errorString); err != nil {
+	if _, err := buf.Write(ErrorString); err != nil {
 		return nil, err
 	}
 
-	clientID, err := r.clientID.Marshal()
+	ClientID, err := r.ClientID.Marshal()
 	if err != nil {
 		return nil, err
 	}
-	if _, err := buf.Write(clientID); err != nil {
+	if _, err := buf.Write(ClientID); err != nil {
 		return nil, err
 	}
 
-	if err := binary.Write(buf, binary.LittleEndian, r.clientType); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, r.ClientType); err != nil {
 		return nil, err
 	}
 
-	userName, err := r.userName.Marshal()
+	UserName, err := r.UserName.Marshal()
 	if err != nil {
 		return nil, err
 	}
-	if _, err := buf.Write(userName); err != nil {
+	if _, err := buf.Write(UserName); err != nil {
 		return nil, err
 	}
 
-	if err := binary.Write(buf, binary.LittleEndian, r.expiresIn); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, r.ExpiresIn); err != nil {
 		return nil, err
 	}
 
-	if err := binary.Write(buf, binary.LittleEndian, r.userID); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, r.UserID); err != nil {
 		return nil, err
 	}
 
 	return buf.Bytes(), nil
 }
 
-func (r *Response) UnMarshal(data []byte) error {
+func (r *ResponseBody) UnMarshal(data []byte) error {
 	buf := bytes.NewBuffer(data)
-	if err := binary.Read(buf, binary.LittleEndian, &r.returnCode); err != nil {
+	if err := binary.Read(buf, binary.LittleEndian, &r.ReturnCode); err != nil {
 		return err
 	}
 
-	if err := r.errorString.UnMarshal(buf.Bytes()); err != nil {
+	if err := r.ErrorString.UnMarshal(buf.Bytes()); err != nil {
 		return err
 	}
-	_ = buf.Next(r.errorString.Length())
+	_ = buf.Next(r.ErrorString.Length())
 
-	if err := r.clientID.UnMarshal(buf.Bytes()); err != nil {
+	if err := r.ClientID.UnMarshal(buf.Bytes()); err != nil {
 		return err
 	}
-	_ = buf.Next(r.clientID.Length())
+	_ = buf.Next(r.ClientID.Length())
 
-	if err := binary.Read(buf, binary.LittleEndian, &r.clientType); err != nil {
-		return err
-	}
-
-	if err := r.userName.UnMarshal(buf.Bytes()); err != nil {
-		return err
-	}
-	_ = buf.Next(r.userName.Length())
-
-	if err := binary.Read(buf, binary.LittleEndian, &r.expiresIn); err != nil {
+	if err := binary.Read(buf, binary.LittleEndian, &r.ClientType); err != nil {
 		return err
 	}
 
-	if err := binary.Read(buf, binary.LittleEndian, &r.userID); err != nil {
+	if err := r.UserName.UnMarshal(buf.Bytes()); err != nil {
+		return err
+	}
+	_ = buf.Next(r.UserName.Length())
+
+	if err := binary.Read(buf, binary.LittleEndian, &r.ExpiresIn); err != nil {
+		return err
+	}
+
+	if err := binary.Read(buf, binary.LittleEndian, &r.UserID); err != nil {
 		return err
 	}
 
