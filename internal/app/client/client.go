@@ -2,10 +2,11 @@ package client
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/DmiAS/cube_cli/internal/app/models"
 )
+
+const unknown = "UNKNOWN_ERROR"
 
 var codes = [...]string{
 	"CUBE_OAUTH2_ERR_OK",
@@ -17,6 +18,7 @@ var codes = [...]string{
 	"CUBE_OAUTH2_ERR_BAD_SCOPE",
 }
 
+type Response = interface{}
 type Protocol interface {
 	Send(token, scope string) (interface{}, error)
 }
@@ -29,16 +31,16 @@ func NewCubeClient(proto Protocol) *CubeClient {
 	return &CubeClient{proto: proto}
 }
 
-func (c *CubeClient) Send(token, scope string) {
+func (c *CubeClient) Send(token, scope string) (Response, error) {
 	resp, err := c.proto.Send(token, scope)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	printResponse(resp)
+	return resp, nil
 }
 
-func printResponse(resp interface{}) {
+func (c *CubeClient) PrintResponse(resp Response) {
 	switch v := resp.(type) {
 	case models.ResponseOk:
 		printOkResponse(v)
@@ -52,6 +54,7 @@ func printResponse(resp interface{}) {
 func printOkResponse(resp models.ResponseOk) {
 	fmt.Printf("client_id: %s\n", resp.ClientID)
 	fmt.Printf("clint_type: %d\n", resp.ClientType)
+	fmt.Printf("expires_in: %d\n", resp.ExpiresIn)
 	fmt.Printf("user_id: %d\n", resp.UserID)
 	fmt.Printf("username: %s\n", resp.UserName)
 }
@@ -62,5 +65,8 @@ func printErrResponse(resp models.ResponseErr) {
 }
 
 func codeToString(code int32) string {
-	return codes[int(code)]
+	if code > int32(len(codes)) {
+		return codes[int(code)]
+	}
+	return unknown
 }
