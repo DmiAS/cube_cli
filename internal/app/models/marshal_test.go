@@ -44,6 +44,16 @@ func compareReqPackets(a, b RequestPacket) bool {
 	return compareHeaders(a.Header, b.Header) && compareReq(a.Body, b.Body)
 }
 
+func compareResponses(a, b Response) bool {
+	return a.userID == b.userID && a.expiresIn == b.expiresIn && a.clientType == b.clientType &&
+		compareStrings(a.userName, b.userName) && compareStrings(a.clientID, b.clientID) &&
+		compareStrings(a.errorString, b.errorString)
+}
+
+func compareResponsePackets(a, b ResponsePacket) bool {
+	return compareResponses(a.Body, b.Body) && compareHeaders(a.Header, b.Header)
+}
+
 func TestStringCoding(t *testing.T) {
 	s := stringToString("token")
 
@@ -196,6 +206,95 @@ func TestRequestPacketCoding(t *testing.T) {
 	}
 
 	if !compareReqPackets(r, newR) {
+		t.Fatalf("%v != %v", newR, r)
+	}
+}
+
+func TestResponseCoding(t *testing.T) {
+	e := stringToString("e")
+	c := stringToString("c")
+	u := stringToString("u")
+	r := Response{
+		returnCode:  10,
+		errorString: e,
+		clientID:    c,
+		clientType:  20,
+		userName:    u,
+		expiresIn:   30,
+		userID:      40,
+	}
+
+	data, err := r.Marshal()
+	if err != nil {
+		t.Fatal("error in marshal", err)
+	}
+
+	var newR Response
+
+	if err := newR.UnMarshal(data); err != nil {
+		t.Fatal("error in unmarshal", err)
+	}
+
+	if !compareResponses(r, newR) {
+		t.Fatalf("%v != %v", newR, r)
+	}
+}
+
+func TestResponseZero(t *testing.T) {
+	r := Response{
+		returnCode: 10,
+		clientType: 20,
+		expiresIn:  30,
+		userID:     40,
+	}
+
+	data, err := r.Marshal()
+	if err != nil {
+		t.Fatal("error in marshal", err)
+	}
+
+	var newR Response
+
+	if err := newR.UnMarshal(data); err != nil {
+		t.Fatal("error in unmarshal", err)
+	}
+
+	if !compareResponses(r, newR) {
+		t.Fatalf("%v != %v", newR, r)
+	}
+}
+
+func TestResponsePacketCoding(t *testing.T) {
+	body := Response{
+		returnCode: 10,
+		clientType: 20,
+		expiresIn:  30,
+		userID:     40,
+	}
+
+	h := Header{
+		SvcID:      10,
+		BodyLength: 20,
+		RequestID:  30,
+	}
+
+	r := ResponsePacket{
+		Header: h,
+		Body:   body,
+	}
+
+	data, err := r.Marshal()
+	if err != nil {
+		t.Fatal("error in marshal", err)
+	}
+
+	var newR ResponsePacket
+
+	if err := newR.UnMarshal(data); err != nil {
+		t.Fatal("error in unmarshal", err)
+	}
+
+	if !compareResponsePackets(r, newR) {
 		t.Fatalf("%v != %v", newR, r)
 	}
 }
