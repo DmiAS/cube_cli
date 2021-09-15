@@ -6,13 +6,12 @@ import (
 )
 
 type ResponseOk struct {
-	ReturnCode  int32
-	ErrorString string
-	ClientID    string
-	ClientType  int32
-	UserName    string
-	ExpiresIn   int32
-	UserID      int64
+	ReturnCode int32
+	ClientID   string
+	ClientType int32
+	UserName   string
+	ExpiresIn  int32
+	UserID     int64
 }
 
 type ResponseErr struct {
