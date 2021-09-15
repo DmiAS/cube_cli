@@ -3,8 +3,6 @@ package iproto
 import (
 	"fmt"
 	"net"
-
-	"github.com/DmiAS/cube_cli/internal/app/models"
 )
 
 const (
@@ -62,30 +60,4 @@ func sendPacket(conn *net.TCPConn, token, scope string) error {
 	}
 
 	return nil
-}
-
-func packRequest(token, scope string) ([]byte, error) {
-	binBody, err := packBody(token, scope)
-	if err != nil {
-		return nil, err
-	}
-
-	binHeader, err := packHeader(binBody)
-	if err != nil {
-		return nil, err
-	}
-
-	req := append(binHeader, binBody...)
-	return req, nil
-}
-
-func packBody(token, scope string) ([]byte, error) {
-	svcToken := strToProtoString(token)
-	svcScope := strToProtoString(scope)
-
-	return Marshal(&models.Request{
-		SvcMsg: svcMsg,
-		Token:  svcToken,
-		Scope:  svcScope,
-	})
 }
