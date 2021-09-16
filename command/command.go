@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/DmiAS/cube_cli/internal/app/cli"
+	"github.com/DmiAS/cube_cli/internal/app/connection/tcp"
 	"github.com/DmiAS/cube_cli/internal/app/delivery/iproto"
 )
 
@@ -22,11 +23,13 @@ func Run(args []string) int {
 	host, port := args[0], args[1]
 	token, scope := args[2], args[3]
 
-	proto, err := iproto.NewClient(host, port)
+	connector, err := tcp.NewConnector(host, port)
 	if err != nil {
-		fmt.Println("can't connect to cube service due to", err)
+		fmt.Println("can't resolve service addr due to", err)
 		return connectionError
 	}
+
+	proto := iproto.NewClient(connector)
 	cube := cli.NewCubeClient(proto)
 
 	resp, err := cube.Send(token, scope)

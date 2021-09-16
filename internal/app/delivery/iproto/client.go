@@ -1,32 +1,23 @@
 package iproto
 
-import (
-	"fmt"
-	"net"
-)
+import "github.com/DmiAS/cube_cli/internal/app/connection"
 
 const (
-	protoType       = "tcp"
-	svcMsg    int32 = 0x00000001
+	svcMsg int32 = 0x00000001
 )
 
 type Response = interface{}
 
 type Client struct {
-	addr *net.TCPAddr
+	connector connection.Connector
 }
 
-func NewClient(host, port string) (*Client, error) {
-	strAddr := fmt.Sprintf("%s:%s", host, port)
-	addr, err := net.ResolveTCPAddr(protoType, strAddr)
-	if err != nil {
-		return nil, err
-	}
-	return &Client{addr: addr}, nil
+func NewClient(connector connection.Connector) *Client {
+	return &Client{connector: connector}
 }
 
 func (c *Client) Send(token, scope string) (Response, error) {
-	conn, err := net.DialTCP(protoType, nil, c.addr)
+	conn, err := c.connector.Dial()
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +35,7 @@ func (c *Client) Send(token, scope string) (Response, error) {
 	return resp, nil
 }
 
-func sendPacket(conn *net.TCPConn, token, scope string) error {
+func sendPacket(conn connection.Connection, token, scope string) error {
 
 	packet, err := packRequest(token, scope)
 	if err != nil {

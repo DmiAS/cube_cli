@@ -1,14 +1,12 @@
 package iproto
 
 import (
-	"io/ioutil"
-	"net"
-
+	"github.com/DmiAS/cube_cli/internal/app/connection"
 	"github.com/DmiAS/cube_cli/internal/app/models"
 )
 
-func getResp(conn *net.TCPConn) (Response, error) {
-	data, err := ioutil.ReadAll(conn)
+func getResp(conn connection.Connection) (Response, error) {
+	data, err := conn.Read()
 	if err != nil {
 		return nil, err
 	}
