@@ -3,6 +3,8 @@ PWD = $(shell pwd)
 APP_NAME = cube_cli
 PATH = "$(PATH):$(PWD)/bin"
 
+.DEFAULT_GOAL := bin
+
 # Запуск сервиса
 .PHONY: bin
 bin:
