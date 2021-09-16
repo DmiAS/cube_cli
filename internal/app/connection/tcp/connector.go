@@ -7,6 +7,7 @@ import (
 	"github.com/DmiAS/cube_cli/internal/app/connection"
 )
 
+// Connector служит для получения ip адреса хоста и создания TCP соединения
 type Connector struct {
 	addr *net.TCPAddr
 }

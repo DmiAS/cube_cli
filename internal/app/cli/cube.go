@@ -18,6 +18,9 @@ var codes = [...]string{
 	"CUBE_OAUTH2_ERR_BAD_SCOPE",
 }
 
+// Protocol предоставляет интерфейс для передачи данных к cube сервису, абстрагируемся от того
+// по какому протоколу они передаются, на этом уровне мы лишь отсылаем токен и скоуп, а принимаем
+// Response, который может быть либо структурой ответа, либо ошибки
 type Response = interface{}
 type Protocol interface {
 	Send(token, scope string) (interface{}, error)

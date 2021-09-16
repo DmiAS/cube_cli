@@ -5,6 +5,8 @@ import (
 	"github.com/DmiAS/cube_cli/internal/app/models"
 )
 
+// полученный поток байт перевести в структуру пакета ответа от сервера, определить какой
+// получили ответ и вернуть соответствующую структуру
 func getResp(conn connection.Connection) (Response, error) {
 	data, err := conn.Read()
 	if err != nil {
@@ -23,6 +25,7 @@ func getResp(conn connection.Connection) (Response, error) {
 	return resp, nil
 }
 
+// следует определить по код какую структуру сформировать
 func determineResponse(packet models.ResponseBody) (Response, error) {
 	if packet.ReturnCode != 0 {
 		errString, err := packet.ErrorString.ToString()

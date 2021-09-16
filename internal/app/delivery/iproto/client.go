@@ -9,6 +9,8 @@ const (
 type Response = interface{}
 
 type Client struct {
+	// Абстрагируемся от того каким способом будем устанавливать соединение с хостом
+	// за нас будет это делать коннектор
 	connector connection.Connector
 }
 

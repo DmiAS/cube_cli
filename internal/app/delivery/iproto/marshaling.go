@@ -1,5 +1,6 @@
 package iproto
 
+// Абстрагируемся от способа серилизации и десерилизации сущности
 type Marshaller interface {
 	Marshal() ([]byte, error)
 	UnMarshal([]byte) error
