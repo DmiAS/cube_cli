@@ -7,7 +7,7 @@ PATH = "$(PATH):$(PWD)/bin"
 .PHONY: bin
 bin:
 	mkdir -p $(PWD)/bin
-	go build -o bin/$(APP_NAME)  $(PWD)/cmd/$(APP_NAME)/main.go
+	go build -o $(PWD)/bin/$(APP_NAME)  $(PWD)/cmd/$(APP_NAME)/main.go
 	export PATH
 
 # Запустить тесты
