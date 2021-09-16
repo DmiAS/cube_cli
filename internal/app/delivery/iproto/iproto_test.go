@@ -31,7 +31,6 @@ func dialFunc(conn connection.Connection, err error) mocks.DialFn {
 	return func() (connection.Connection, error) {
 		return conn, err
 	}
-
 }
 
 func compareResponseOk(a, b models.ResponseOk) bool {
@@ -52,14 +51,13 @@ func TestClientInvalidDial(t *testing.T) {
 	}
 }
 
-func TestClientInvalidConnection(t *testing.T) {
+func TestClientInvalidWrite(t *testing.T) {
 	writeFn := writeFunc(true)
 
 	closeFn := closeFunc(nil)
 
 	conn := &mocks.Connection{
 		CloseWriteFn: closeFn,
-		ReadFn:       nil,
 		WriteFn:      writeFn,
 	}
 
@@ -170,9 +168,7 @@ func TestClientReadOk(t *testing.T) {
 		WriteFn:      writeFunc(false),
 	}
 
-	dialFn := func() (connection.Connection, error) {
-		return conn, nil
-	}
+	dialFn := dialFunc(conn, nil)
 
 	connector := mocks.NewConnector(dialFn)
 	proto := NewClient(connector)
