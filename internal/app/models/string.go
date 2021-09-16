@@ -13,6 +13,7 @@ type String struct {
 	Str []int8
 }
 
+// Используется, чтобы знать, сколько байт из буфера было просчитано
 func (s String) Length() int {
 	return int32Size + len(s.Str)
 }

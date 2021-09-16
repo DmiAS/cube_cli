@@ -53,6 +53,8 @@ func (r *Request) UnMarshal(data []byte) error {
 		return err
 	}
 
+	// так как я не знаю сколько было считано байт из buf входе UnMarshal
+	// я пропускаю эти байты, высчитывая с помощью Length сколько было считано
 	_ = buf.Next(r.Token.Length())
 
 	if err := r.Scope.UnMarshal(buf.Bytes()); err != nil {
