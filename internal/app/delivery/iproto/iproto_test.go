@@ -238,3 +238,35 @@ func TestClientWriteFields(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+func TestClientRequestHeader(t *testing.T) {
+	token, scope := "abracadabra", "test"
+
+	// здесь проверяю правильно упаковались данные или нет
+	readFn := func(data []byte) ([]byte, error) {
+		req := &models.RequestPacket{}
+		length := req.Header.BodyLength
+
+		body, _ := req.Body.Marshal()
+		bodyLength := int32(len(body))
+		if length != bodyLength {
+			return nil, fmt.Errorf("header length(%d) != body length(%d)", length, bodyLength)
+		}
+
+		return data, nil
+	}
+	conn := &mocks.Connection{
+		CloseWriteFn: closeFunc(errors.New("can't close connection")),
+		ReadFn:       readFn,
+	}
+
+	dialFn := dialFunc(conn, nil)
+
+	connector := mocks.NewConnector(dialFn)
+	proto := NewClient(connector)
+	cli := cli2.NewCubeClient(proto)
+
+	if _, err := cli.Send(token, scope); err == nil {
+		t.Fatalf("err = %v", err)
+	}
+}
