@@ -4,9 +4,6 @@ APP_NAME = cube_cli
 
 .DEFAULT_GOAL := bin
 
-PATH  := $(PATH):$(PWD)/bin
-SHELL := env PATH=$(PATH) /bin/bash
-
 # Запуск сервиса
 .PHONY: bin
 bin:
