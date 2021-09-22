@@ -40,40 +40,42 @@ func (r *ResponseBody) Marshal() ([]byte, error) {
 		return nil, err
 	}
 
-	ErrorString, err := r.ErrorString.Marshal()
-	if err != nil {
-		return nil, err
-	}
-	if _, err := buf.Write(ErrorString); err != nil {
-		return nil, err
-	}
+	if r.ReturnCode == 0 {
+		ClientID, err := r.ClientID.Marshal()
+		if err != nil {
+			return nil, err
+		}
+		if _, err := buf.Write(ClientID); err != nil {
+			return nil, err
+		}
 
-	ClientID, err := r.ClientID.Marshal()
-	if err != nil {
-		return nil, err
-	}
-	if _, err := buf.Write(ClientID); err != nil {
-		return nil, err
-	}
+		if err := binary.Write(buf, binary.LittleEndian, r.ClientType); err != nil {
+			return nil, err
+		}
 
-	if err := binary.Write(buf, binary.LittleEndian, r.ClientType); err != nil {
-		return nil, err
-	}
+		UserName, err := r.UserName.Marshal()
+		if err != nil {
+			return nil, err
+		}
+		if _, err := buf.Write(UserName); err != nil {
+			return nil, err
+		}
 
-	UserName, err := r.UserName.Marshal()
-	if err != nil {
-		return nil, err
-	}
-	if _, err := buf.Write(UserName); err != nil {
-		return nil, err
-	}
+		if err := binary.Write(buf, binary.LittleEndian, r.ExpiresIn); err != nil {
+			return nil, err
+		}
 
-	if err := binary.Write(buf, binary.LittleEndian, r.ExpiresIn); err != nil {
-		return nil, err
-	}
-
-	if err := binary.Write(buf, binary.LittleEndian, r.UserID); err != nil {
-		return nil, err
+		if err := binary.Write(buf, binary.LittleEndian, r.UserID); err != nil {
+			return nil, err
+		}
+	} else {
+		ErrorString, err := r.ErrorString.Marshal()
+		if err != nil {
+			return nil, err
+		}
+		if _, err := buf.Write(ErrorString); err != nil {
+			return nil, err
+		}
 	}
 
 	return buf.Bytes(), nil
@@ -85,31 +87,32 @@ func (r *ResponseBody) UnMarshal(data []byte) error {
 		return err
 	}
 
-	if err := r.ErrorString.UnMarshal(buf.Bytes()); err != nil {
-		return err
-	}
-	_ = buf.Next(r.ErrorString.Length())
+	if r.ReturnCode == 0 {
+		if err := r.ClientID.UnMarshal(buf.Bytes()); err != nil {
+			return err
+		}
+		_ = buf.Next(r.ClientID.Length())
 
-	if err := r.ClientID.UnMarshal(buf.Bytes()); err != nil {
-		return err
-	}
-	_ = buf.Next(r.ClientID.Length())
+		if err := binary.Read(buf, binary.LittleEndian, &r.ClientType); err != nil {
+			return err
+		}
 
-	if err := binary.Read(buf, binary.LittleEndian, &r.ClientType); err != nil {
-		return err
-	}
+		if err := r.UserName.UnMarshal(buf.Bytes()); err != nil {
+			return err
+		}
+		_ = buf.Next(r.UserName.Length())
 
-	if err := r.UserName.UnMarshal(buf.Bytes()); err != nil {
-		return err
-	}
-	_ = buf.Next(r.UserName.Length())
+		if err := binary.Read(buf, binary.LittleEndian, &r.ExpiresIn); err != nil {
+			return err
+		}
 
-	if err := binary.Read(buf, binary.LittleEndian, &r.ExpiresIn); err != nil {
-		return err
-	}
-
-	if err := binary.Read(buf, binary.LittleEndian, &r.UserID); err != nil {
-		return err
+		if err := binary.Read(buf, binary.LittleEndian, &r.UserID); err != nil {
+			return err
+		}
+	} else {
+		if err := r.ErrorString.UnMarshal(buf.Bytes()); err != nil {
+			return err
+		}
 	}
 
 	return nil

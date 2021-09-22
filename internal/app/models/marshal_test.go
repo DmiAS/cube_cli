@@ -1,6 +1,8 @@
 package models
 
-import "testing"
+import (
+	"testing"
+)
 
 func stringToString(str string) String {
 	length := len(str)
@@ -297,4 +299,38 @@ func TestResponsePacketCoding(t *testing.T) {
 	if !compareResponsePackets(r, newR) {
 		t.Fatalf("%v != %v", newR, r)
 	}
+}
+
+func TestResponse(t *testing.T) {
+	errStr := stringToString("C")
+	resp := &ResponseBody{
+		ReturnCode:  1,
+		ErrorString: stringToString("C"),
+		ClientID:    stringToString("test_client_id"),
+		ClientType:  2002,
+		UserName:    stringToString("testuser@mail.ru"),
+		ExpiresIn:   3600,
+		UserID:      101010,
+	}
+
+	b, err := resp.Marshal()
+	if err != nil {
+		t.Fatalf("can't marshal body = %s", err.Error())
+	}
+
+	ans := new(ResponseBody)
+
+	if err := ans.UnMarshal(b); err != nil {
+		t.Fatalf("can't unmarshal body = %s", err.Error())
+	}
+
+	res := ResponseBody{
+		ReturnCode:  1,
+		ErrorString: errStr,
+	}
+
+	if ok := compareResponses(*ans, res); !ok {
+		t.Fatalf("%v != %v", ans, res)
+	}
+
 }

@@ -68,7 +68,7 @@ func printErrResponse(resp models.ResponseErr) {
 }
 
 func codeToString(code int32) string {
-	if code > int32(len(codes)) {
+	if code >= 0 && code < int32(len(codes)) {
 		return codes[int(code)]
 	}
 	return unknown

@@ -2,6 +2,8 @@ package iproto
 
 import "github.com/DmiAS/cube_cli/internal/app/models"
 
+const cube_svc int32 = 0x00000002
+
 // для передачи по сети используем слайс байт, соответственно нужно завернуть токен и скоуп
 // в пакет, сформировать структура пакета запроса и преобразовать ее в слайс байт
 func packRequest(token, scope string) ([]byte, error) {
@@ -20,11 +22,10 @@ func packRequest(token, scope string) ([]byte, error) {
 }
 
 func packHeader(body []byte) ([]byte, error) {
-	var svcID int32 = 0
 	bodyLength := int32(len(body))
 	var reqID int32 = 0
 	return Marshal(&models.Header{
-		SvcID:      svcID,
+		SvcID:      cube_svc,
 		BodyLength: bodyLength,
 		RequestID:  reqID,
 	})
